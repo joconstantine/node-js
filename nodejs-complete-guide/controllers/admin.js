@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator/check');
+const mongoose = require('mongoose');
 
 const Product = require('../models/product');
 exports.getAddProduct = (req, res, next) => {
@@ -38,6 +39,7 @@ exports.postAddProduct = (req, res, next) => {
     }
 
     const product = new Product({
+        _id: new mongoose.Types.ObjectId('60d0a9939266206414cb22f7'),
         title: title,
         price: price,
         description: description,
@@ -50,7 +52,12 @@ exports.postAddProduct = (req, res, next) => {
             console.log('Created Product');
             res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatus = 500;
+            return next(error); //express will skip other middlewares and go to the error handler
+            // return res.redirect('/500');
+        });
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -77,7 +84,11 @@ exports.getEditProduct = (req, res, next) => {
                 validationErrors: [],
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatus = 500;
+            return next(error);
+        });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -121,7 +132,11 @@ exports.postEditProduct = (req, res, next) => {
                     res.redirect('/admin/products');
                 });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatus = 500;
+            return next(error);
+        });
 
 }
 
@@ -137,7 +152,11 @@ exports.getProducts = (req, res, next) => {
                 activeShop: true,
             });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatus = 500;
+            return next(error);
+        });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -147,5 +166,9 @@ exports.postDeleteProduct = (req, res, next) => {
             console.log('DESTROY PRODUCT');
             return res.redirect('/admin/products');
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatus = 500;
+            return next(error);
+        });
 };

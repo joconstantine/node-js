@@ -44,19 +44,6 @@ app.use(session({
 app.use(csrfProtection);
 app.use(flash());
 
-app.use((req, res, next) => {
-    if (!req.session.user) {
-        next();
-    } else {
-        User.findById(req.session.user._id)
-            .then(user => {
-                req.user = user;
-                next(); //proceed
-            })
-            .catch(err => console.log(err));
-    }
-});
-
 // To set csrfToken and isAuthenticated for all views
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
@@ -64,11 +51,41 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use((req, res, next) => {
+    if (!req.session.user) {
+        next();
+    } else {
+        User.findById(req.session.user._id)
+            .then(user => {
+                if (!user) {
+                    return next();
+                }
+                req.user = user;
+                next(); //proceed
+            })
+            .catch(err => {
+                next(err);
+            });
+    }
+});
+
 app.use('/admin', isAuth, adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 
+app.get('/500', errorController.get500);
+
 app.use(errorController.get404);
+
+// error handling middleware
+app.use((error, req, res, next) => {
+    return res.status(500).render(
+        '500', {
+        pageTitle: 'Error!',
+        path: '/500',
+        isAuthenticated: req.session.isLoggedIn
+    });
+})
 
 mongoose.connect(MONGODB_URL)
     .then(() => {
