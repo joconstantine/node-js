@@ -24,6 +24,27 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
+const multer = require('multer');
+
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images');
+    },
+    filename: (req, file, cb) => {
+        const filename = new Date().toISOString().split(":")[0] + new Date().getSeconds() + new Date().getMilliseconds() + "-" + file.originalname;
+        console.log(filename);
+        cb(null, filename);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === "image/png" || file.minetype == "image/jpg" || file.mimetype === "image/jpeg") {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 
 const User = require('./models/user');
 const MONGODB_URL = 'mongodb+srv://joconstantine:' + process.env.MONGO_DB_PASSWORD + '@cluster0.d1bhv.mongodb.net/shop?retryWrites=true&w=majority'
@@ -34,7 +55,11 @@ const store = new MongoDBStore({
 const csrfProtection = csrf();
 
 app.use(express.urlencoded({ extended: true }));
+app.use(multer({ storage: fileStorage, fileFilter: fileFilter }).single('image'));
+
 app.use(express.static(path.join(rootDir, 'public')));
+app.use('/images', express.static(path.join(rootDir, 'images')));
+
 app.use(session({
     secret: 'my scret',
     resave: false, //only save when there are changes,
@@ -79,6 +104,7 @@ app.use(errorController.get404);
 
 // error handling middleware
 app.use((error, req, res, next) => {
+    console.log(error);
     return res.status(500).render(
         '500', {
         pageTitle: 'Error!',

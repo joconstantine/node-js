@@ -1,7 +1,7 @@
 const path = require('path');
 
 const express = require('express');
-const { body } = require('express-validator/check');
+const { body } = require('express-validator');
 
 const router = express.Router();
 
@@ -17,8 +17,6 @@ router.post('/add-product',
             .isString()
             .isLength({ min: 3 })
             .trim(),
-        body('imageUrl', 'Please enter a valid Image URL')
-            .isURL(),
         body('price', 'Please enter a valid Price')
             .isFloat(),
         body('description', 'Please enter a valid Description')
@@ -36,8 +34,6 @@ router.post('/edit-product',
             .isString()
             .isLength({ min: 3 })
             .trim(),
-        body('imageUrl', 'Please enter a valid Image URL')
-            .isURL(),
         body('price', 'Please enter a valid Price')
             .isFloat(),
         body('description', 'Please enter a valid Description')
@@ -47,6 +43,6 @@ router.post('/edit-product',
     , adminController.postEditProduct
 );
 
-router.post('/delete-product', adminController.postDeleteProduct);
+router.delete('/product/:productId', adminController.postDeleteProduct);
 
 module.exports = router;
