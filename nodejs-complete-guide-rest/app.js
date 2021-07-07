@@ -6,6 +6,7 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 
@@ -42,16 +43,22 @@ app.use((req, res, next) => {
 })
 
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
     const message = error.message;
-    res.status(status).json({ message: message });
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
 });
 
 mongoose.connect(MONGODB_URL)
     .then(result => {
-        app.listen(8080);
+        const server = app.listen(8080);
+        const io = require('./socket').init(server, "http://localhost:3000");
+        io.on("connection", socket => {
+            console.log('Client connected');
+        });
     })
     .catch(err => console.log(err));
