@@ -53,12 +53,12 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data: data });
 });
 
-mongoose.connect(MONGODB_URL)
-    .then(result => {
-        const server = app.listen(8080);
-        const io = require('./socket').init(server, "http://localhost:3000");
-        io.on("connection", socket => {
-            console.log('Client connected');
-        });
-    })
-    .catch(err => console.log(err));
+// mongoose.connect(MONGODB_URL)
+//     .then(result => {
+//         const server = app.listen(8080);
+//         const io = require('./socket').init(server, "http://localhost:3000");
+//         io.on("connection", socket => {
+//             console.log('Client connected');
+//         });
+//     })
+//     .catch(err => console.log(err));
